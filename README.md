@@ -1,4 +1,5 @@
 # HardMOB Scrapper
+Script to scrap [HardMOB](https://www.hardmob.com.br/forums/407-Promocoes) promotions site given a specify keyword
 
 ## Installation
 
