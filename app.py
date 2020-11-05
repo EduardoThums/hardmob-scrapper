@@ -1,8 +1,17 @@
 import re
+from argparse import ArgumentParser
 from collections import namedtuple
 from datetime import datetime
 
 from selenium.webdriver import Firefox
+
+
+def parse_arguments():
+    parser = ArgumentParser()
+
+    parser.add_argument('-w', '--word', help='the specific keyword to search up to', required=True)
+
+    return parser.parse_args()
 
 
 def chose_new_page_number(current_page_number: str) -> str:
@@ -44,6 +53,9 @@ def is_thread_date_more_than_five_days_old(thread_date: str) -> bool:
 
 
 if __name__ == '__main__':
+    args = parse_arguments()
+    keyword = args.word
+
     driver = Firefox(executable_path='./drivers/geckodriver', service_log_path='/dev/null')
     hardmob_base_url = 'https://www.hardmob.com.br'
 
@@ -52,8 +64,6 @@ if __name__ == '__main__':
 
     threads_info = []
     ThreadInfo = namedtuple('ThreadInfo', ['title', 'link'])
-
-    keyword = 'cadeira'
 
     while should_continue_searching:
         driver.get(f'{hardmob_base_url}/forums/407-Promocoes/{page_number}')
