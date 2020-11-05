@@ -1,5 +1,6 @@
 import re
 from collections import namedtuple
+from datetime import datetime
 
 from selenium.webdriver import Firefox
 
@@ -18,23 +19,55 @@ def chose_new_page_number(current_page_number: str) -> str:
     return f'page{integer_page_number + 1}'
 
 
+def is_thread_date_more_than_five_days_old(thread_date: str) -> bool:
+    """
+    Compare the current date with the thread date to check if the thread date is more than five days old
+    @param thread_date: the date when the thread was posted
+    @returns if the thread more than five days older
+    """
+    today = datetime.now()
+
+    try:
+        day, month, year, *_ = thread_date.split('-')
+
+    except ValueError:
+        return False
+
+    else:
+        year = year.split(',')[0]
+
+    thread_date = datetime(year=int(year), month=int(month), day=int(day))
+
+    difference_in_days = (today - thread_date).days
+
+    return difference_in_days > 5
+
+
 if __name__ == '__main__':
     driver = Firefox(executable_path='./drivers/geckodriver', service_log_path='/dev/null')
     hardmob_base_url = 'https://www.hardmob.com.br'
 
     page_number = ''
+    should_continue_searching = True
 
     threads_info = []
     ThreadInfo = namedtuple('ThreadInfo', ['title', 'link'])
 
     keyword = 'cadeira'
 
-    while page_number != 'page4':
+    while should_continue_searching:
         driver.get(f'{hardmob_base_url}/forums/407-Promocoes/{page_number}')
 
         threads = driver.find_element_by_class_name('threads').find_elements_by_class_name('threadbit')
 
         for thread in threads:
+            post_info = thread.find_element_by_class_name('threadlastpost')
+            post_date = post_info.find_elements_by_tag_name('dd')[1]
+
+            if is_thread_date_more_than_five_days_old(post_date.text):
+                should_continue_searching = False
+                break
+
             title_tag = thread.find_element_by_class_name('title')
             title = title_tag.text
 
