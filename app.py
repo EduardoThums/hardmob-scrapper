@@ -3,27 +3,47 @@ from collections import namedtuple
 
 from selenium.webdriver import Firefox
 
+
+def chose_new_page_number(current_page_number: str) -> str:
+    """
+    Chose the new page number given the current one
+    @param current_page_number: the current page number
+    @returns the new page number
+    """
+    if not current_page_number:
+        return 'page2'
+
+    integer_page_number = int(current_page_number[-1])
+
+    return f'page{integer_page_number + 1}'
+
+
 if __name__ == '__main__':
     driver = Firefox(executable_path='./drivers/geckodriver', service_log_path='/dev/null')
-
     hardmob_base_url = 'https://www.hardmob.com.br'
 
-    driver.get(f'{hardmob_base_url}/forums/407-Promocoes/page2')
-
-    threads = driver.find_element_by_class_name('threads').find_elements_by_class_name('threadbit')
+    page_number = ''
 
     threads_info = []
     ThreadInfo = namedtuple('ThreadInfo', ['title', 'link'])
 
     keyword = 'cadeira'
 
-    for thread in threads:
-        title = thread.find_element_by_class_name('title').text
+    while page_number != 'page4':
+        driver.get(f'{hardmob_base_url}/forums/407-Promocoes/{page_number}')
 
-        if re.search(keyword, title, re.IGNORECASE) is not None:
-            link = f'{hardmob_base_url}/{thread.find_element_by_class_name("thread_gotonew").get_attribute("href")}'
+        threads = driver.find_element_by_class_name('threads').find_elements_by_class_name('threadbit')
 
-            threads_info.append(ThreadInfo(title=title, link=link))
+        for thread in threads:
+            title_tag = thread.find_element_by_class_name('title')
+            title = title_tag.text
+
+            if re.search(keyword, title, re.IGNORECASE) is not None:
+                link = title_tag.get_attribute("href")
+
+                threads_info.append(ThreadInfo(title=title, link=link))
+
+        page_number = chose_new_page_number(current_page_number=page_number)
 
     driver.close()
 
