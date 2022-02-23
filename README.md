@@ -20,3 +20,12 @@ Example of search given "phones" as keyword:
 ```
 python app.py -w phones
 ```
+
+
+## Update
+
+This scrap method doesn't work anymore :(
+
+They added captchas to block the search through the pages.
+
+This repo will remaing archived until they remove the captcha or someone find a better solution.
